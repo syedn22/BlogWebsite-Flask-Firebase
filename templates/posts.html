@@ -6,6 +6,18 @@
 
 {% block body %}
 <h1>All posts</h1>
+<hr>
+<h2>Create New Blog Post</h2>
+<form action='/posts' method='POST'>
+    Title: <input type='text' name='title' id='title'>
+    <br>
+    Author:  <input type='text' name='author' id='author'>
+    <br>
+    Post:  <input type='text' name='content' id='content'>
+    <br>
+    <input type='submit' value='Post'>
+</form>
+<hr>
 
     {% for post in posts %}
         <h2>{{ post.title }}</h2>
@@ -15,5 +27,8 @@
         <h3>By:author unknown</h3>
     {% endif %}
     <p>{{ post.content }}</p>
+    <a href='/posts/delete/{{post.id}}'>Delete</a>
+    <a href='/posts/edit/{{post.id}}'>Edit</a>
+    <hr>
     {% endfor %}
 {% endblock %}
