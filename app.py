@@ -15,24 +15,11 @@ class BlogPost(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False,default=datetime.utcnow)
 
     def __repr__(self):
-        return 'Blog post '+ str(self.id)
+       return 'Blog post '+ str(self.id)
 
 
-all_posts = [
-    {
-        'title' : 'Post 1',
-        'content' : 'This is the content of the post 1.',
-        'author' : 'Reshma'
-    },
-    {
-        'title' : 'Post 2',
-        'content' : 'This is the content of the post 2.'
-    }
-]
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+
 
 @app.route('/posts',methods=['GET','POST'])
 def posts():

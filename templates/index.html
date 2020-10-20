@@ -1,9 +1,31 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add Text</title>
 
-{% block head %}
-<title>HOME</title>
-{% endblock %}
+    <!-- include libraries(jQuery,bootstrap) -->
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
 
-{% block body %}
-<h1>hii</h1>
-{% endblock %}
+    <!-- include summernote css/js-->
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
+</head>
+<body>
+    <h1>Type something in below!</h1>
+    <form method="post">
+        <textarea id="summernote" name="editordata"></textarea>
+        <input type="submit" value="Add Content" />
+    </form>
+    <script>
+        $(document).ready(function() {
+        $('#summernote').summernote();
+        });
+    </script>
+</body>
+</html>
+
