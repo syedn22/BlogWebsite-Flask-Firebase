@@ -20,9 +20,15 @@ class BlogPost(db.Model):
         return 'Blog post ' + str(self.id)
 
 
+@app.route('/')
+def Home():
+    return render_template('Home.html')
+
+
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+
 
 @app.route('/login')
 def login():
