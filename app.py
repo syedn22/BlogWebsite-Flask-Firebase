@@ -5,8 +5,8 @@ import pyrebase
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
-
 db = SQLAlchemy(app)
+
 
 firebaseConfig = {
     "apiKey": "AIzaSyDv6WuyVD_A6nAc-UCrttOcHjYxf6ujQuc",
@@ -19,17 +19,10 @@ firebaseConfig = {
 }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
-
 auth = firebase.auth()
 
+user = auth.current_user
 
-class AccountDetails(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100),nullable=False)
-    username = db.Column(db.String(100),nullable=False)
-
-    def __repr__(self):
-        return 'Account ' + str(self.id)
 
 class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,6 +41,30 @@ def Home():
     return render_template('Home.html')
 
 
+@app.route('/changepassword', methods=['GET', 'POST'])
+def changepassword():
+    if auth.current_user == None:
+        return redirect('/login')
+    all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+    if auth.current_user:
+        auth.send_password_reset_email(auth.current_user['email'])
+        return render_template('profile.html', user=auth.current_user['email'], error="false", posts=all_posts)
+    else:
+        return redirect('/login')
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if auth.current_user == None:
+        return redirect('/login')
+
+    if request.method == 'POST':
+        pass
+    else:
+        all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+        return render_template('profile.html', user=auth.current_user['email'], posts=all_posts)
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -58,9 +75,10 @@ def signup():
             try:
                 result = auth.create_user_with_email_and_password(
                     email, password)
+                user = auth.current_user
                 return redirect("/posts")
             except:
-                return "Failed"
+                return "Failed to signup"
     else:
         return render_template('signup.html')
 
@@ -70,14 +88,12 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['Password']
-        print(email)
-        print(password)
         try:
             result = auth.sign_in_with_email_and_password(email, password)
-            print(auth.current_user)
+            user = auth.current_user
             return redirect("/posts")
         except:
-            return "Failed"
+            return "Failed to login"
     else:
         return render_template('login.html')
 
@@ -101,18 +117,22 @@ def posts():
 
 @app.route('/newPost')
 def newPost():
+    if auth.current_user == None:
+        return redirect('/login')
+    print(auth.current_user['email'])
+    # user = auth.current_user.email
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
-        post_author = request.form['author']
-        print(post_title)
+        print(request.form['author'])
+        # post_author = request.form['author']
         new_post = BlogPost(
             title=post_title, content=post_content, author=post_author)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/posts')
     else:
-        return render_template('newPost.html')
+        return render_template('newPost.html', author=auth.current_user['email'])
 
 
 @app.route('/posts/delete/<int:id>')

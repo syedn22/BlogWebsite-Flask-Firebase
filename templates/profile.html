@@ -1,0 +1,32 @@
+{% extends 'base.html' %} {% block head %}
+<title>Profile-Blog</title>
+{% endblock %} {% block body %}
+<h1>Profile</h1>
+<hr />
+<h1>Email id: <span class="badge badge-secondary">{{user}}</span></h1>
+<h2>Change Password :</h2>
+<a class="btn btn-primary" href="/changepassword">Click Here</a>
+{% if error %}
+<div class="alert alert-success" role="alert">
+  Mail sent successfully to reset your password...... Check Your Inbox.
+</div>
+{% endif %}
+<hr />
+<h3><span class="badge badge-secondary">Your Posts</span></h3>
+
+{% for post in posts %} {% if post.author == user %}
+
+<div>
+  <div class="shadow p-3 mb-5 bg-white rounded">
+    <h2 class="text-uppercase">{{ post.title }}</h2>
+    {% if post.author %}
+    <h3 class="badge badge-pill badge-dark">By: {{ post.author}}</h3>
+    {% else %}
+    <h3>By:author unknown</h3>
+    {% endif %}
+    <p>{{ post.content|safe }}</p>
+    <a href="/posts/delete/{{post.id}}" class="btn btn-danger">Delete</a>
+    <a href="/posts/edit/{{post.id}}" class="btn btn-warning">Edit</a>
+  </div>
+</div>
+{% endif %} {% endfor %} {% endblock %}

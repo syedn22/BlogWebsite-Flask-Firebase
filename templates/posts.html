@@ -4,8 +4,9 @@
 <h1>All posts</h1>
 <hr />
 
+
 {% for post in posts %}
-<div >
+<div>
   <div class="shadow p-3 mb-5 bg-white rounded">
     <h2 class="text-uppercase">{{ post.title }}</h2>
     {% if post.author %}
@@ -14,8 +15,6 @@
     <h3>By:author unknown</h3>
     {% endif %}
     <p>{{ post.content|safe }}</p>
-    <a href="/posts/delete/{{post.id}}" class="btn btn-danger">Delete</a>
-    <a href="/posts/edit/{{post.id}}" class="btn btn-warning">Edit</a>
   </div>
 </div>
 {% endfor %} {% endblock %}
