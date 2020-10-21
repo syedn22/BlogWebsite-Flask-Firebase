@@ -1,47 +1,21 @@
-{% extends 'base.html' %}
-
-{% block head %}
+{% extends 'base.html' %} {% block head %}
 <title>Posts</title>
-<!-- include libraries(jQuery,bootstrap) -->
-<link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
-<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
-<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
-
-<!-- include summernote css/js-->
-<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
-<script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
-{% endblock %}
-
-{% block body %}
+{% endblock %} {% block body %}
 <h1>All posts</h1>
-<hr>
-<h2>Create New Blog Post</h2>
-<form action='/posts' method='POST'>
-    Title: <input type='text' name='title' id='title'>
-    <br>
-    Author:  <input type='text' name='author' id='author'>
-    <br>
-    Post :<textarea id="content" name="content"></textarea>
-    <br>
-    <input type='submit' value='Post'>
-</form>
-<script>
-    $(document).ready(function() {
-    $('#content').summernote();
-    });
-</script>
-<hr>
+<hr />
 
-    {% for post in posts %}
-        <h2>{{ post.title }}</h2>
-        {% if post.author %}
-            <h3>By: {{ post.author}}</h3>
-        {% else %}
-        <h3>By:author unknown</h3>
+{% for post in posts %}
+<div >
+  <div class="shadow p-3 mb-5 bg-white rounded">
+    <h2 class="text-uppercase">{{ post.title }}</h2>
+    {% if post.author %}
+    <h3 class="badge badge-pill badge-dark">By: {{ post.author}}</h3>
+    {% else %}
+    <h3>By:author unknown</h3>
     {% endif %}
     <p>{{ post.content|safe }}</p>
-    <a href='/posts/delete/{{post.id}}'>Delete</a>
-    <a href='/posts/edit/{{post.id}}'>Edit</a>
-    <hr>
-    {% endfor %}
-{% endblock %}
+    <a href="/posts/delete/{{post.id}}" class="btn btn-danger">Delete</a>
+    <a href="/posts/edit/{{post.id}}" class="btn btn-warning">Edit</a>
+  </div>
+</div>
+{% endfor %} {% endblock %}

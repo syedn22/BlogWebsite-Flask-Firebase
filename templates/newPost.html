@@ -1,0 +1,46 @@
+{% extends 'base.html' %} 
+{% block head %}
+<title>New Post</title>
+{% endblock %} 
+
+{% block body %}
+<h2 class="alert alert-dark m-5">Create New Blog Post</h2>
+<form action="/posts" method="POST">
+    <div class="form-group">
+        <h1 ><span class="badge badge-dark"> Title</span>  </h1>
+        <input
+          class="form-control"
+          type="text"
+          name="title"
+          id="title"
+        />
+      </div>
+      <div class="form-group">
+        <h1  ><span class="badge badge-dark"> Author</span>  </h1>
+
+        <input
+          class="form-control"
+          type="text"
+          name="author"
+          id="author"
+        />
+      </div>
+      <div>
+        <h1  ><span class="badge badge-dark">Post</span>  </h1>
+
+        <textarea
+          class="form-control"
+          type="text"
+          name="content"
+          id="content"
+        >
+</textarea>
+  <input type="submit" value="Post" class="btn btn-primary m-2" />
+</form>
+<script>
+  $(document).ready(function () {
+    $("#content").summernote();
+  });
+</script>
+<hr />
+{% endblock %} 

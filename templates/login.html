@@ -1,0 +1,25 @@
+{% extends 'base.html' %} {% block head %}
+<title>SignUp html</title>
+{% endblock %} {% block body %}
+
+<form style="width: 400px; margin: 40px">
+  <h1 class="alert alert-dark">Login Form</h1>
+
+  <div class="form-group">
+    <label for="exampleInputEmail1">Email address</label>
+    <input
+      type="email"
+      class="form-control"
+      id="exampleInputEmail1"
+      aria-describedby="emailHelp"
+    />
+  </div>
+  <div class="form-group">
+    <label for="Password">Password</label>
+    <input type="password" class="form-control" id="Password" />
+  </div>
+
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+{% endblock %}
