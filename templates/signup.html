@@ -2,15 +2,16 @@
 <title>SignUp html</title>
 {% endblock %} {% block body %}
 
-<form style="width: 400px; margin: 40px">
-  <h1 class="alert alert-dark" >Sign Up Form</h1>
+<form action="/signup" method="POST" style="width: 400px; margin: 40px">
+  <h1 class="alert alert-dark">Sign Up Form</h1>
 
   <div class="form-group">
     <label for="exampleInputEmail1">Email address</label>
     <input
       type="email"
       class="form-control"
-      id="exampleInputEmail1"
+      id="email"
+      name="email"
       aria-describedby="emailHelp"
     />
     <small id="emailHelp" class="form-text text-muted"
@@ -19,11 +20,16 @@
   </div>
   <div class="form-group">
     <label for="Password">Password</label>
-    <input type="password" class="form-control" id="Password" />
+    <input type="password" name="Password" class="form-control" id="Password" />
   </div>
   <div class="form-group">
     <label for="ConfirmPassword">Confirm Password</label>
-    <input type="password" class="form-control" id="ConfirmPassword" />
+    <input
+      type="password"
+      class="form-control"
+      name="ConfirmPassword"
+      id="ConfirmPassword"
+    />
   </div>
 
   <button type="submit" class="btn btn-primary">Sign Up</button>
