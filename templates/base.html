@@ -36,9 +36,7 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
     {% block head %} {% endblock %}
   </head>
-  <body
-    class="text-monospace"
-  >
+  <body class="text-monospace">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="navbar-brand">Blogging App</div>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -51,6 +49,7 @@
           <li class="nav-item">
             <a class="nav-link" href="/profile">Profile</a>
           </li>
+          {% if not (author or user) %}
           <li class="nav-item">
             <a class="nav-link" href="/login">Login</a>
           </li>
@@ -58,8 +57,15 @@
           <li class="nav-item">
             <a class="nav-link" href="/signup">SignUp</a>
           </li>
+          {% endif %} {% if (author or user) %}
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+          </li>
+          {% endif %}
         </ul>
       </div>
+      <p class="badge badge-dark m-2">{{user}}</p>
+      <p class="badge badge-dark m-2">{{author}}</p>
       <a class="btn btn-outline-success my-2 my-sm-0" href="/newPost">
         New post
       </a>

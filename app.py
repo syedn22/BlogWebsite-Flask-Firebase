@@ -41,6 +41,12 @@ def Home():
     return render_template('Home.html')
 
 
+@app.route('/logout')
+def logout():
+    auth.current_user = None
+    return redirect('/posts')
+
+
 @app.route('/changepassword', methods=['GET', 'POST'])
 def changepassword():
     if auth.current_user == None:
@@ -100,6 +106,10 @@ def login():
 
 @app.route('/posts', methods=['GET', 'POST'])
 def posts():
+    if auth.current_user == None:
+        user = ""
+    else:
+        user = auth.current_user['email']
 
     if request.method == 'POST':
         post_title = request.form['title']
@@ -112,7 +122,7 @@ def posts():
         return redirect('/posts')
     else:
         all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
-        return render_template('posts.html', posts=all_posts)
+        return render_template('posts.html', posts=all_posts, user=user)
 
 
 @app.route('/newPost')
@@ -124,8 +134,8 @@ def newPost():
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
-        print(request.form['author'])
-        # post_author = request.form['author']
+        # print(request.form['author'])
+        post_author = request.form['author']
         new_post = BlogPost(
             title=post_title, content=post_content, author=post_author)
         db.session.add(new_post)
