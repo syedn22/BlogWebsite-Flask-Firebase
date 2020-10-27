@@ -6,8 +6,6 @@ import pyrebase
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy(app)
-
-
 firebaseConfig = {
     "apiKey": "AIzaSyB4nvrWnoscwQfC-fbArplFtKcYritUNIc",
     "authDomain": "jsrapp-daca2.firebaseapp.com",
@@ -23,6 +21,7 @@ auth = firebase.auth()
 database = firebase.database()
 
 user = auth.current_user
+database = firebase.database()
 
 
 class BlogPost(db.Model):
@@ -115,6 +114,7 @@ def posts():
         return render_template('login.html')
     else:
         user = auth.current_user['email']
+        curr_id = auth.current_user['email']
 
     if request.method == 'GET':
         all_posts = database.child("posts").get(
@@ -132,24 +132,20 @@ def newPost():
     if auth.current_user == None:
         return redirect('/login')
 
-    else:
-        user = auth.current_user['email']
-        curr_id = auth.current_user['email']
-
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = BlogPost(
-            title=post_title, content=post_content, author=post_author)
-        db.session.add(new_post)
-        db.session.commit()
         token_id = auth.current_user['idToken']
-        database.child("posts").push(data={"title":post_title,"author":post_author,"content":post_content},token=auth.current_user['idToken'])
+        temp = {"title": post_title,
+                "author": post_author, "content": post_content}
+        database.child("posts").push(
+            data=temp, token=auth.current_user['idToken'])
         return redirect('/posts')
     else:
-        # all_posts = database.child("posts").get().val().values()
+        all_posts = database.child("posts").get().val().values()
         return render_template('newPost.html', user=user)
+
 
 @app.route('/posts/delete/<int:id>')
 def delete(id):
