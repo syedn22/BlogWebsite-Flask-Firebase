@@ -9,17 +9,18 @@ db = SQLAlchemy(app)
 
 
 firebaseConfig = {
-    "apiKey": "AIzaSyDv6WuyVD_A6nAc-UCrttOcHjYxf6ujQuc",
-    "authDomain": "blog-app-fbe3f.firebaseapp.com",
-    "databaseURL": "https://blog-app-fbe3f.firebaseio.com",
-    "projectId": "blog-app-fbe3f",
-    "storageBucket": "blog-app-fbe3f.appspot.com",
-    "messagingSenderId": "964400661258",
-    "appId": "1:964400661258:web:550f779ad51f30c1f3f0f3"
+    "apiKey": "AIzaSyB4nvrWnoscwQfC-fbArplFtKcYritUNIc",
+    "authDomain": "jsrapp-daca2.firebaseapp.com",
+    "databaseURL": "https://jsrapp-daca2.firebaseio.com",
+    "projectId": "jsrapp-daca2",
+    "storageBucket": "jsrapp-daca2.appspot.com",
+    "messagingSenderId": "8813826011",
+    "appId": "1:8813826011:web:b9b117e1a1b4b71bbfa1fe"
 }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
+database = firebase.database()
 
 user = auth.current_user
 
@@ -81,10 +82,12 @@ def signup():
             try:
                 result = auth.create_user_with_email_and_password(
                     email, password)
+                print(auth.current_user)
                 user = auth.current_user
                 return redirect("/posts")
             except:
                 return "Failed to signup"
+
     else:
         return render_template('signup.html')
 
@@ -97,9 +100,11 @@ def login():
         try:
             result = auth.sign_in_with_email_and_password(email, password)
             user = auth.current_user
+            print(auth.current_user)
             return redirect("/posts")
         except:
             return "Failed to login"
+
     else:
         return render_template('login.html')
 
@@ -107,43 +112,44 @@ def login():
 @app.route('/posts', methods=['GET', 'POST'])
 def posts():
     if auth.current_user == None:
-        user = ""
+        return render_template('login.html')
     else:
         user = auth.current_user['email']
 
-    if request.method == 'POST':
-        post_title = request.form['title']
-        post_content = request.form['content']
-        post_author = request.form['author']
-        new_post = BlogPost(
-            title=post_title, content=post_content, author=post_author)
-        db.session.add(new_post)
-        db.session.commit()
-        return redirect('/posts')
+    if request.method == 'GET':
+        all_posts = database.child("posts").get(
+            token=auth.current_user['idToken'])
+        posts = []
+        for post in all_posts:
+            posts.append(post.val())
+        return render_template('posts.html', posts=posts, user=user)
     else:
-        all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
-        return render_template('posts.html', posts=all_posts, user=user)
+        return redirect('/posts')
 
 
-@app.route('/newPost')
+@app.route('/newPost', methods=['POST', 'GET'])
 def newPost():
     if auth.current_user == None:
         return redirect('/login')
-    print(auth.current_user['email'])
-    # user = auth.current_user.email
+
+    else:
+        user = auth.current_user['email']
+        curr_id = auth.current_user['email']
+
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
-        # print(request.form['author'])
         post_author = request.form['author']
         new_post = BlogPost(
             title=post_title, content=post_content, author=post_author)
         db.session.add(new_post)
         db.session.commit()
+        token_id = auth.current_user['idToken']
+        database.child("posts").push(data={"title":post_title,"author":post_author,"content":post_content},token=auth.current_user['idToken'])
         return redirect('/posts')
     else:
-        return render_template('newPost.html', author=auth.current_user['email'])
-
+        # all_posts = database.child("posts").get().val().values()
+        return render_template('newPost.html', user=user)
 
 @app.route('/posts/delete/<int:id>')
 def delete(id):
