@@ -51,7 +51,7 @@ def logout():
 def changepassword():
     if auth.current_user == None:
         return redirect('/login')
-    all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+    all_posts = getPosts()
     if auth.current_user:
         auth.send_password_reset_email(auth.current_user['email'])
         return render_template('profile.html', user=auth.current_user['email'], error="false", posts=all_posts)
@@ -67,14 +67,8 @@ def profile():
     if request.method == 'POST':
         pass
     else:
-        all_posts = database.child("posts").get(
-            token=auth.current_user['idToken'])
-        posts = []
-        for post in all_posts:
-            temp = post.val()
-            temp['id'] = post.key()
-            posts.append(temp)
-        return render_template('profile.html', user=auth.current_user['email'], posts=posts)
+        all_posts = getPosts()
+        return render_template('profile.html', user=auth.current_user['email'], posts=all_posts)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -121,14 +115,8 @@ def posts():
         user = auth.current_user['email']
 
     if request.method == 'GET':
-        all_posts = database.child("posts").get(
-            token=auth.current_user['idToken'])
-        posts = []
-        for post in all_posts:
-            temp = post.val()
-            temp['id'] = post.key()
-            posts.append(temp)
-        return render_template('posts.html', posts=posts, user=user)
+        all_posts = getPosts()
+        return render_template('posts.html', posts=all_posts, user=user)
     else:
         return redirect('/posts')
 
@@ -147,11 +135,9 @@ def newPost():
         token_id = auth.current_user['idToken']
         temp = {"title": post_title,
                 "author": post_author, "content": post_content}
-        database.child("posts").push(
-            data=temp, token=auth.current_user['idToken'])
+        putPost(temp)
         return redirect('/posts')
     else:
-        all_posts = database.child("posts").get().val().values()
         return render_template('newPost.html', author=author)
 
 
@@ -164,9 +150,7 @@ def delete(id):
 
 @app.route('/posts/edit/<string:id>', methods=['GET', 'POST'])
 def edit(id):
-
-    post = database.child("posts").child(id).get(token=auth.current_user['idToken']).val()
-    post['id'] = database.child("posts").child(id).get(token=auth.current_user['idToken']).key()
+    post = getPost(id)
     if request.method == 'POST':
         post_title = request.form['title']
         post_author = request.form['author']
@@ -178,6 +162,25 @@ def edit(id):
         return redirect('/posts')
     else:
         return render_template('edit.html', post=post)
+
+def getPost(id):
+    post = database.child("posts").child(id).get(token=auth.current_user['idToken']).val()
+    post['id'] = database.child("posts").child(id).get(token=auth.current_user['idToken']).key()
+
+    return post
+
+def getPosts():
+    all_posts = database.child("posts").get(token=auth.current_user['idToken'])
+    posts = []
+    for post in all_posts:
+        temp = post.val()
+        temp['id'] = post.key()
+        posts.append(temp)
+    return posts
+
+def putPost(temp):
+    database.child("posts").push(
+            data=temp, token=auth.current_user['idToken'])
 
 
 if __name__ == "__main__":
