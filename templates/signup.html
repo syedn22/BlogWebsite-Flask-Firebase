@@ -6,11 +6,6 @@
   <h1 class="alert alert-dark">Sign Up Form</h1>
 
   <div class="form-group">
-    <label for="username">Username</label>
-    <input type="text" name="username" class="form-control" id="username" />
-  </div>
-
-  <div class="form-group">
     <label for="exampleInputEmail1">Email address</label>
     <input
       type="email"
@@ -38,6 +33,11 @@
   </div>
 
   <button type="submit" class="btn btn-primary">Sign Up</button>
+  {% if error %}
+  <div class="alert alert-danger m-" role="alert">
+    Incorrect Username or Password
+  </div>
+  {% endif %}
 </form>
 
 {% endblock %}

@@ -21,6 +21,11 @@
   </div>
 
   <button type="submit" class="btn btn-primary">Login</button>
+  {% if error %}
+  <div class="alert alert-danger m-5" role="alert">
+    Incorrect Username or Password
+  </div>
+  {% endif %}
 </form>
 
 {% endblock %}
