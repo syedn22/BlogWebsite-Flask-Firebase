@@ -24,18 +24,6 @@ user = auth.current_user
 database = firebase.database()
 
 
-class BlogPost(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(20), nullable=False, default='N/A')
-    date_posted = db.Column(db.DateTime, nullable=False,
-                            default=datetime.utcnow)
-
-    def __repr__(self):
-        return 'Blog post ' + str(self.id)
-
-
 @app.route('/')
 def Home():
     return render_template('Home.html')
@@ -64,9 +52,7 @@ def profile():
     if auth.current_user == None:
         return redirect('/login')
 
-    if request.method == 'POST':
-        pass
-    else:
+    if request.method == 'GET':
         all_posts = getPosts()
         return render_template('profile.html', user=auth.current_user['email'], posts=all_posts)
 
@@ -81,8 +67,6 @@ def signup():
             try:
                 result = auth.create_user_with_email_and_password(
                     email, password)
-                print(auth.current_user)
-                user = auth.current_user
                 return redirect("/posts")
             except:
                 return "Failed to signup"
@@ -107,38 +91,32 @@ def login():
         return render_template('login.html')
 
 
-@app.route('/posts', methods=['GET', 'POST'])
+@app.route('/posts', methods=['GET'])
 def posts():
     if auth.current_user == None:
         return render_template('login.html')
-    else:
-        user = auth.current_user['email']
 
     if request.method == 'GET':
         all_posts = getPosts()
-        return render_template('posts.html', posts=all_posts, user=user)
-    else:
-        return redirect('/posts')
+        return render_template('posts.html', posts=all_posts, user=auth.current_user['email'])
+
 
 
 @app.route('/newPost', methods=['POST', 'GET'])
 def newPost():
     if auth.current_user == None:
         return redirect('/login')
-    else:
-        author = auth.current_user['email']
 
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        token_id = auth.current_user['idToken']
         temp = {"title": post_title,
                 "author": post_author, "content": post_content}
         putPost(temp)
         return redirect('/posts')
     else:
-        return render_template('newPost.html', author=author)
+        return render_template('newPost.html', author=auth.current_user['email'])
 
 
 @app.route('/posts/delete/<string:id>')
@@ -157,17 +135,20 @@ def edit(id):
         post_content = request.form['content']
         temp = {"title": post_title,
                 "author": post_author, "content": post_content}
-        database.child("posts").child(id).update(
-            data=temp,token=auth.current_user['idToken'])
+        updatePost(temp, id)
         return redirect('/posts')
     else:
         return render_template('edit.html', post=post)
 
+
 def getPost(id):
-    post = database.child("posts").child(id).get(token=auth.current_user['idToken']).val()
-    post['id'] = database.child("posts").child(id).get(token=auth.current_user['idToken']).key()
+    post = database.child("posts").child(id).get(
+        token=auth.current_user['idToken']).val()
+    post['id'] = database.child("posts").child(id).get(
+        token=auth.current_user['idToken']).key()
 
     return post
+
 
 def getPosts():
     all_posts = database.child("posts").get(token=auth.current_user['idToken'])
@@ -178,9 +159,15 @@ def getPosts():
         posts.append(temp)
     return posts
 
+
 def putPost(temp):
     database.child("posts").push(
-            data=temp, token=auth.current_user['idToken'])
+        data=temp, token=auth.current_user['idToken'])
+
+
+def updatePost(temp, id):
+    database.child("posts").child(id).update(
+        data=temp, token=auth.current_user['idToken'])
 
 
 if __name__ == "__main__":
