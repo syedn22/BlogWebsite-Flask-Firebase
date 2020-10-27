@@ -63,8 +63,8 @@ def signup():
         email = request.form['email']
         password = request.form['Password']
         confirmPassword = request.form['ConfirmPassword']
-        if len(password)<8:
-            return render_template('signup.html',error=True)
+        if len(password) < 8:
+            return render_template('signup.html', error=True)
 
         if password == confirmPassword:
             try:
@@ -73,7 +73,7 @@ def signup():
                 print(result)
                 return redirect("/posts")
             except:
-                return render_template('signup.html',error=True)
+                return render_template('signup.html', error=True)
 
     else:
         return render_template('signup.html')
@@ -84,8 +84,8 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['Password']
-        if len(password)<8:
-            return render_template('login.html',error=True)
+        if len(password) < 8:
+            return render_template('login.html', error=True)
         try:
             result = auth.sign_in_with_email_and_password(email, password)
             return redirect("/posts")
@@ -104,7 +104,6 @@ def posts():
     if request.method == 'GET':
         all_posts = getPosts()
         return render_template('posts.html', posts=all_posts, user=auth.current_user['email'])
-
 
 
 @app.route('/newPost', methods=['POST', 'GET'])
