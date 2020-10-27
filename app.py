@@ -67,8 +67,14 @@ def profile():
     if request.method == 'POST':
         pass
     else:
-        all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
-        return render_template('profile.html', user=auth.current_user['email'], posts=all_posts)
+        all_posts = database.child("posts").get(
+            token=auth.current_user['idToken'])
+        posts = []
+        for post in all_posts:
+            temp = post.val()
+            temp['id'] = post.key()
+            posts.append(temp)
+        return render_template('profile.html', user=auth.current_user['email'], posts=posts)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -99,7 +105,6 @@ def login():
         try:
             result = auth.sign_in_with_email_and_password(email, password)
             user = auth.current_user
-            print(auth.current_user)
             return redirect("/posts")
         except:
             return "Failed to login"
@@ -114,14 +119,15 @@ def posts():
         return render_template('login.html')
     else:
         user = auth.current_user['email']
-        curr_id = auth.current_user['email']
 
     if request.method == 'GET':
         all_posts = database.child("posts").get(
             token=auth.current_user['idToken'])
         posts = []
         for post in all_posts:
-            posts.append(post.val())
+            temp = post.val()
+            temp['id'] = post.key()
+            posts.append(temp)
         return render_template('posts.html', posts=posts, user=user)
     else:
         return redirect('/posts')
@@ -131,6 +137,8 @@ def posts():
 def newPost():
     if auth.current_user == None:
         return redirect('/login')
+    else:
+        author = auth.current_user['email']
 
     if request.method == 'POST':
         post_title = request.form['title']
@@ -144,26 +152,29 @@ def newPost():
         return redirect('/posts')
     else:
         all_posts = database.child("posts").get().val().values()
-        return render_template('newPost.html', user=user)
+        return render_template('newPost.html', author=author)
 
 
-@app.route('/posts/delete/<int:id>')
+@app.route('/posts/delete/<string:id>')
 def delete(id):
-    post = BlogPost.query.get_or_404(id)
-    db.session.delete(post)
-    db.session.commit()
+    print(id)
+    database.child("posts").child(id).remove()
     return redirect('/posts')
 
 
-@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/posts/edit/<string:id>', methods=['GET', 'POST'])
 def edit(id):
 
-    post = BlogPost.query.get_or_404(id)
+    post = database.child("posts").child(id).get(token=auth.current_user['idToken']).val()
+    post['id'] = database.child("posts").child(id).get(token=auth.current_user['idToken']).key()
     if request.method == 'POST':
-        post.title = request.form['title']
-        post.author = request.form['author']
-        post.content = request.form['content']
-        db.session.commit()
+        post_title = request.form['title']
+        post_author = request.form['author']
+        post_content = request.form['content']
+        temp = {"title": post_title,
+                "author": post_author, "content": post_content}
+        database.child("posts").child(id).update(
+            data=temp,token=auth.current_user['idToken'])
         return redirect('/posts')
     else:
         return render_template('edit.html', post=post)
