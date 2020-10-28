@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block head %}
-<title>SignUp html</title>
+<title>Login html</title>
 {% endblock %} {% block body %}
 
 <form action="/login" method="POST" style="width: 400px; margin: 40px">
@@ -21,6 +21,11 @@
   </div>
 
   <button type="submit" class="btn btn-primary">Login</button>
+  {% if error %}
+  <div class="alert alert-danger m-5" role="alert">
+    Incorrect Username or Password
+  </div>
+  {% endif %}
 </form>
 
 {% endblock %}

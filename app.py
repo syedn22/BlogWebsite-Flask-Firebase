@@ -7,32 +7,21 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
 db = SQLAlchemy(app)
 firebaseConfig = {
-  "apiKey": "AIzaSyB4nvrWnoscwQfC-fbArplFtKcYritUNIc",
-  "authDomain": "jsrapp-daca2.firebaseapp.com",
-  "databaseURL": "https://jsrapp-daca2.firebaseio.com",
-  "projectId": "jsrapp-daca2",
-  "storageBucket": "jsrapp-daca2.appspot.com",
-  "messagingSenderId": "8813826011",
-  "appId": "1:8813826011:web:b9b117e1a1b4b71bbfa1fe"
+    "apiKey": "AIzaSyB4nvrWnoscwQfC-fbArplFtKcYritUNIc",
+    "authDomain": "jsrapp-daca2.firebaseapp.com",
+    "databaseURL": "https://jsrapp-daca2.firebaseio.com",
+    "projectId": "jsrapp-daca2",
+    "storageBucket": "jsrapp-daca2.appspot.com",
+    "messagingSenderId": "8813826011",
+    "appId": "1:8813826011:web:b9b117e1a1b4b71bbfa1fe"
 }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
+database = firebase.database()
 
 user = auth.current_user
 database = firebase.database()
-
-
-class BlogPost(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(20), nullable=False, default='N/A')
-    date_posted = db.Column(db.DateTime, nullable=False,
-                            default=datetime.utcnow)
-
-    def __repr__(self):
-        return 'Blog post ' + str(self.id)
 
 
 @app.route('/')
@@ -50,7 +39,7 @@ def logout():
 def changepassword():
     if auth.current_user == None:
         return redirect('/login')
-    all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+    all_posts = getPosts()
     if auth.current_user:
         auth.send_password_reset_email(auth.current_user['email'])
         return render_template('profile.html', user=auth.current_user['email'], error="false", posts=all_posts)
@@ -63,10 +52,8 @@ def profile():
     if auth.current_user == None:
         return redirect('/login')
 
-    if request.method == 'POST':
-        pass
-    else:
-        all_posts = BlogPost.query.order_by(BlogPost.date_posted).all()
+    if request.method == 'GET':
+        all_posts = getPosts()
         return render_template('profile.html', user=auth.current_user['email'], posts=all_posts)
 
 
@@ -76,13 +63,18 @@ def signup():
         email = request.form['email']
         password = request.form['Password']
         confirmPassword = request.form['ConfirmPassword']
+        if len(password) < 8:
+            return render_template('signup.html', error=True)
+
         if password == confirmPassword:
             try:
                 result = auth.create_user_with_email_and_password(
                     email, password)
+                print(result)
                 return redirect("/posts")
             except:
-                return "Failed to signup"
+                return render_template('signup.html', error=True)
+
     else:
         return render_template('signup.html')
 
@@ -92,81 +84,110 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['Password']
+        if len(password) < 8:
+            return render_template('login.html', error=True)
         try:
             result = auth.sign_in_with_email_and_password(email, password)
-            user = auth.current_user
             return redirect("/posts")
         except:
-            return "Failed to login"
+            return auth.current_user
+
     else:
         return render_template('login.html')
 
 
-@app.route('/posts', methods=['GET', 'POST'])
+@app.route('/posts', methods=['GET'])
 def posts():
     if auth.current_user == None:
-        return redirect('/login')
+        return render_template('login.html')
 
-    else:
-        user = auth.current_user['email']
-        curr_id = auth.current_user['email']
-
-    if request.method == 'POST':
-        post_title = request.form['title']
-        post_content = request.form['content']
-        post_author = request.form['author']
-        new_post = BlogPost(
-            title=post_title, content=post_content, author=post_author)
-        db.session.add(new_post)
-        db.session.commit()
-        token_id = auth.current_user['idToken']
-        database.child("posts").push(data={"title":post_title,"author":post_author,"content":post_content},token=auth.current_user['idToken'])
-        return redirect('/posts')
-    else:
-        all_posts = database.child("posts").get().val().values()
-        return render_template('posts.html', posts=all_posts, user=user)
+    if request.method == 'GET':
+        all_posts = getPosts()
+        return render_template('posts.html', posts=all_posts, user=auth.current_user['email'])
 
 
-@app.route('/newPost')
+@app.route('/newPost', methods=['POST', 'GET'])
 def newPost():
     if auth.current_user == None:
         return redirect('/login')
-    print(auth.current_user['email'])
+
     if request.method == 'POST':
         post_title = request.form['title']
         post_content = request.form['content']
         post_author = request.form['author']
-        new_post = BlogPost(
-            title=post_title, content=post_content, author=post_author)
-        db.session.add(new_post)
-        db.session.commit()
+        temp = {"title": post_title,
+                "author": post_author, "content": post_content}
+        putPost(temp)
         return redirect('/posts')
     else:
         return render_template('newPost.html', author=auth.current_user['email'])
 
 
-
-@app.route('/posts/delete/<int:id>')
+@app.route('/posts/delete/<string:id>')
 def delete(id):
-    post = BlogPost.query.get_or_404(id)
-    db.session.delete(post)
-    db.session.commit()
+    print(id)
+    database.child("posts").child(id).remove()
     return redirect('/posts')
 
 
-@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/posts/edit/<string:id>', methods=['GET', 'POST'])
 def edit(id):
-
-    post = BlogPost.query.get_or_404(id)
+    post = getPost(id)
     if request.method == 'POST':
-        post.title = request.form['title']
-        post.author = request.form['author']
-        post.content = request.form['content']
-        db.session.commit()
+        post_title = request.form['title']
+        post_author = request.form['author']
+        post_content = request.form['content']
+        temp = {"title": post_title,
+                "author": post_author, "content": post_content}
+        updatePost(temp, id)
         return redirect('/posts')
     else:
         return render_template('edit.html', post=post)
 
+@app.route('/posts/comment/<string:id>',methods=['GET', 'POST'])
+def comment(id):
+    if request.method == 'POST':
+        comment = request.form['comment']        
+        putComment(comment,id)
+        return redirect('/posts')
+    else:
+        return redirect('/posts')
+
+def getPost(id):
+    post = database.child("posts").child(id).get(
+        token=auth.current_user['idToken']).val()
+    post['id'] = database.child("posts").child(id).get(
+        token=auth.current_user['idToken']).key()
+
+    return post
+
+
+def getPosts():
+    all_posts = database.child("posts").get(token=auth.current_user['idToken'])
+    posts = []
+    for post in all_posts:
+        temp = post.val()
+        temp['id'] = post.key()
+        posts.append(temp)
+    return posts
+
+
+def putPost(data):
+    database.child("posts").push(
+        data=data, token=auth.current_user['idToken'])
+
+
+def updatePost(data, id):
+    database.child("posts").child(id).update(
+        data=data, token=auth.current_user['idToken'])
+
+def putComment(message,id):
+    comment={}
+    comment['id']=auth.current_user['email']
+    comment['comment']=message
+    print(comment)
+    database.child("posts").child(id).child("comments").push(data=comment, token=auth.current_user['idToken'])
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
