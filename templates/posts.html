@@ -1,10 +1,10 @@
 {% extends 'base.html' %} {% block head %}
 <title>Posts</title>
 <style type="text/css">
-  .button{
-      background: url(like.jpg) no-repeat;
-      cursor:pointer;
-      border: none;
+  .button {
+    background: url(like.jpg) no-repeat;
+    cursor: pointer;
+    border: none;
   }
 </style>
 {% endblock %} {% block body %}
@@ -21,6 +21,35 @@
     <h3>By:author unknown</h3>
     {% endif %}
     <p>{{ post.content|safe }}</p>
+    <div class="alert alert-primary" role="alert">Comments</div>
+    {% if post.comments %} {% for commentted_by,comment in post.comments.items()
+    %}
+    <div>
+      <div>
+        <p class="badge badge-pill badge-primary">{{ comment['id'] }}</p>
+        {{ comment['comment'] }}
+      </div>
+    </div>
+
+    {% endfor %} {% endif %}
+    <form action="/posts/comment/{{post.id}}" method="POST">
+      <div class="form-group"></div>
+      <input
+        type="text"
+        name="comment"
+        id="comment"
+        class="form-control"
+        aria-label="comment"
+      />
+      <div class="input-group-append">
+        <button
+          href="/posts/comment/{{post.id}}"
+          class="btn btn-outline-secondary"
+        >
+          Add Comment
+        </button>
+      </div>
+    </form>
   </div>
+  {% endfor %} {% endblock %}
 </div>
-{% endfor %} {% endblock %}

@@ -144,6 +144,14 @@ def edit(id):
     else:
         return render_template('edit.html', post=post)
 
+@app.route('/posts/comment/<string:id>',methods=['GET', 'POST'])
+def comment(id):
+    if request.method == 'POST':
+        comment = request.form['comment']        
+        putComment(comment,id)
+        return redirect('/posts')
+    else:
+        return redirect('/posts')
 
 def getPost(id):
     post = database.child("posts").child(id).get(
@@ -164,15 +172,22 @@ def getPosts():
     return posts
 
 
-def putPost(temp):
+def putPost(data):
     database.child("posts").push(
-        data=temp, token=auth.current_user['idToken'])
+        data=data, token=auth.current_user['idToken'])
 
 
-def updatePost(temp, id):
+def updatePost(data, id):
     database.child("posts").child(id).update(
-        data=temp, token=auth.current_user['idToken'])
+        data=data, token=auth.current_user['idToken'])
 
+def putComment(message,id):
+    comment={}
+    comment['id']=auth.current_user['email']
+    comment['comment']=message
+    print(comment)
+    database.child("posts").child(id).child("comments").push(data=comment, token=auth.current_user['idToken'])
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
