@@ -50,6 +50,9 @@
         </button>
       </div>
     </form>
+    <form method="post" action="/posts/like/{{post.id}}">
+      <input type="submit" value="Like" name="like"/>
+    </form>
   </div>
   {% endfor %} {% endblock %}
 </div>

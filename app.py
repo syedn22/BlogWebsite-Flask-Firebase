@@ -154,10 +154,8 @@ def comment(id):
         return redirect('/posts')
 
 def getPost(id):
-    post = database.child("posts").child(id).get(
-        token=auth.current_user['idToken']).val()
-    post['id'] = database.child("posts").child(id).get(
-        token=auth.current_user['idToken']).key()
+    post = database.child("posts").child(id).get(token=auth.current_user['idToken']).val()
+    post['id'] = database.child("posts").child(id).get(token=auth.current_user['idToken']).key()
 
     return post
 
@@ -188,6 +186,14 @@ def putComment(message,id):
     print(comment)
     database.child("posts").child(id).child("comments").push(data=comment, token=auth.current_user['idToken'])
     
+@app.route('/posts/like/<string:id>', methods=['GET', 'POST'])
+
+def like_post(id):
+    if request.method == 'POST':
+        like=auth.current_user['email']
+        database.child("posts").child(id).child("like").child("liker_id").push(like)
+        
+        return redirect('/posts')
 
 if __name__ == "__main__":
     app.run(debug=True)
