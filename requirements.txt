@@ -78,7 +78,6 @@ python-jwt==2.0.1
 python-smpp==0.1.9
 python-vlc==3.0.11115
 pytz==2020.1
-pywin32==228
 pywinpty==0.5.7
 pyzmq==19.0.2
 requests==2.24.0
