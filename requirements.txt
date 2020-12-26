@@ -91,7 +91,6 @@ sqlparse==0.3.1
 terminado==0.9.1
 testpath==0.4.4
 toml==0.10.1
-traitlets==5.0.4
 tzlocal==2.1
 urllib3==1.25.8
 wavio==0.0.4
