@@ -61,7 +61,7 @@ pywinpty==0.5.7
 pyzmq==19.0.2
 requests==2.24.0
 requests-toolbelt==0.9.1
-rsa==4.6
+rsa==4.7
 Send2Trash==1.5.0
 six==1.14.0
 sqlparse==0.3.1
